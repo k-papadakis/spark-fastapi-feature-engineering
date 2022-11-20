@@ -7,10 +7,12 @@ import pandas as pd
 import featuretools as ft
 from featuretools.primitives import AggregationPrimitive, TransformPrimitive
 from featuretools.feature_base import IdentityFeature
-from fastapi import FastAPI, Query, Body
+from fastapi import FastAPI, Query
 from pydantic import BaseModel, create_model
 from pydantic.main import ModelMetaclass
 
+
+DATA_PATH = "/data/cvas_data.json"
 CUSTOMER_ID_COL = "customer_ID"
 LOAN_ID_COL = "loan_ID"  # This gets created by the script.
 LOAN_DATE_COL = "loan_date"
@@ -103,14 +105,13 @@ def engineer_features(
     return customer_features.reset_index(), customer_defs
 
 
-df_raw = load_raw_features("cvas_data.json")
+df_raw = load_raw_features(DATA_PATH)
 
 app = FastAPI()
 
 
 @app.get("/")
 def root():
-
     return {"message": "Welcome to the Feature Engineering API"}
 
 
