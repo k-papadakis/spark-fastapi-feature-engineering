@@ -147,7 +147,7 @@ def fetch_engineer_features(
 
 @app.get("/status", tags=["checks"])
 def check_status():
-    # TODO: try except httperror
+    # TODO: ?
     return {"status": "UP"}
 
 
