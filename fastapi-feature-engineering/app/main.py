@@ -2,6 +2,8 @@ from typing import Literal
 import json
 import datetime
 import os
+import logging
+import logging.config
 
 import pandas as pd
 import featuretools as ft
@@ -11,7 +13,15 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel, create_model
 from pydantic.main import ModelMetaclass
 
+# Logging set up
+with open('logconfig.json') as f:
+    logconfig = json.load(f)
+logging.config.dictConfig(logconfig)
+logging.raiseExceptions = False
+logger = logging.getLogger(__name__)
+logger.info("Starting new session")
 
+# Constants related to the data and its schema
 DATA_PATH = "/data/cvas_data.json"
 CUSTOMER_ID_COL = "customer_ID"
 LOAN_ID_COL = "loan_ID"  # This gets created by the script.
@@ -22,7 +32,8 @@ NUMERIC_COLS = ["amount", "fee", "annual_income", "loan_status"]
 CATEGORICAL_COLS = ["loan_status", "term"]
 CUSTOMER_COLS = ["annual_income"]
 
-AGG_PRIMITIVES = [
+# Default parameters for feature engineering
+AGG_PRIMITIVES_DEFAULT = [
     "max",
     "min",
     "mean",
@@ -31,7 +42,7 @@ AGG_PRIMITIVES = [
     "num_unique",
     "mode",
 ]
-TRANS_PRIMITIVES = [
+TRANS_PRIMITIVES_DEFAULT = [
     "year",
     "month",
     "day",
@@ -78,7 +89,7 @@ def load_raw_features(path: str | os.PathLike) -> pd.DataFrame:
 def engineer_features(
     df: pd.DataFrame, transforms: list[str | TransformPrimitive], aggregations: list[str | AggregationPrimitive]
 ) -> tuple[pd.DataFrame, IdentityFeature]:
-    """Engineer features for each customer with the specified transforms and aggregations on the loans"""
+    """Engineers features for each customer with the specified transforms and aggregations on the loans"""
 
     customers = df[[CUSTOMER_ID_COL, *CUSTOMER_COLS]].drop_duplicates(subset=[CUSTOMER_ID_COL])
     loans = df.drop(columns=CUSTOMER_COLS).reset_index(names=LOAN_ID_COL)
@@ -105,23 +116,25 @@ def engineer_features(
     return customer_features.reset_index(), customer_defs
 
 
+logger.info("Loading the data from the json file")
 df_raw = load_raw_features(DATA_PATH)
 
 app = FastAPI()
+logger.info("Initialized the API")
 
 
 @app.get("/")
-def root():
+async def root():
     return {"message": "Welcome to the Feature Engineering API"}
 
 
 @app.get("/features/raw", response_model=list[RawFeatures], tags=["features"])
-def read_raw_features(customer_id: list[str] | None = Query(default=None)):
+async def read_raw_features(customer_id: list[str] | None = Query(default=None)):
     df = df_raw
     if customer_id is not None:
-        df = df.loc[df[CUSTOMER_ID_COL].isin(customer_id)]  # TODO: Assert no overwrite.
+        df = df.loc[df[CUSTOMER_ID_COL].isin(customer_id)]
 
-    df = df.replace()  # for JSON compatibility
+    df = df.astype(object).where(df.notna(), None)  # for JSON compatibility
     records = df.to_dict("records")
 
     return records
@@ -129,8 +142,8 @@ def read_raw_features(customer_id: list[str] | None = Query(default=None)):
 
 @app.post("/features/engineer", tags=["features"])
 def fetch_engineer_features(
-    transforms: list[str] = TRANS_PRIMITIVES,
-    aggregations: list[str] = AGG_PRIMITIVES,
+    transforms: list[str] = TRANS_PRIMITIVES_DEFAULT,
+    aggregations: list[str] = AGG_PRIMITIVES_DEFAULT,
     customer_id: list[str] | None = Query(default=None)
 ):
     df = df_raw
@@ -142,11 +155,16 @@ def fetch_engineer_features(
     df_eng = df_eng.astype(object).where(df_eng.notna(), None)  # for JSON compatibility
     records = df_eng.to_dict("records")
 
+    logger.info(
+        "Engineered customer features with "
+        "customer_id=%s, transforms=%s, aggregations=%s", customer_id, aggregations, transforms
+    )
+
     return records
 
 
 @app.get("/status", tags=["checks"])
-def check_status():
+async def check_status():
     # TODO: ?
     return {"status": "UP"}
 
