@@ -10,14 +10,13 @@ import featuretools as ft
 from featuretools.primitives import AggregationPrimitive, TransformPrimitive
 from featuretools.feature_base import IdentityFeature
 from fastapi import FastAPI, Query
-from pydantic import BaseModel, create_model
-from pydantic.main import ModelMetaclass
+from pydantic import BaseModel
 
 # Logging set up
-with open('logconfig.json') as f:
+with open('./logconfig.json') as f:
     logconfig = json.load(f)
 logging.config.dictConfig(logconfig)
-logging.raiseExceptions = False
+logging.raiseExceptions = True
 logger = logging.getLogger(__name__)
 logger.info("Starting new session")
 
@@ -64,14 +63,6 @@ class RawFeatures(BaseModel):
     annual_income: int
 
 
-def model_from_dataframe(df: pd.DataFrame) -> ModelMetaclass:
-    """Dynamically creates a pydantic model from a pandas.DataFrame"""
-    record = df.iloc[0, :].to_dict()
-    record_types = {name: (type(v), ...) for name, v in record.items()}
-    model = create_model("EngineeredFeatures", **record_types)
-    return model
-
-
 def load_raw_features(path: str | os.PathLike) -> pd.DataFrame:
     """Loads the json file into a pandas dataframe"""
     with open(path) as f:
@@ -116,8 +107,8 @@ def engineer_features(
     return customer_features.reset_index(), customer_defs
 
 
-logger.info("Loading the data from the json file")
 df_raw = load_raw_features(DATA_PATH)
+logger.info("Loaded the data from the json file")
 
 app = FastAPI()
 logger.info("Initialized the API")

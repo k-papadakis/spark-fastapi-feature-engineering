@@ -13,8 +13,8 @@
       "formatter": "default",
       "filename": "app.log",
       "mode": "a",
-      "maxBytes": 10000000,
-      "backupCount": 10
+      "maxBytes": 1000000,
+      "backupCount": 2
     }
   },
   "root": {
