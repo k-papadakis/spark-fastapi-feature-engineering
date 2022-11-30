@@ -18,10 +18,6 @@
 
 <configuration>
   <property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://localhost:9000</value>
-  </property>
-  <property>
     <name>dfs.namenode.name.dir</name>
     <value>/hadoop/dfs/name</value>
   </property>
