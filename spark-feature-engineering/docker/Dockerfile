@@ -14,11 +14,6 @@ ADD ./hadoop-3.3.4.tar.gz /opt/
 ENV HADOOP_HOME=/opt/hadoop-3.3.4
 COPY hadoop-env.sh hdfs-site.xml core-site.xml ${HADOOP_HOME}/etc/hadoop/
 
-# TODO: Move this to docker-compose
-# Default namenode adress is 0.0.0.0:9870
-# See https://hadoop.apache.org/docs/r3.3.4/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
-# EXPOSE 9870 22
-
 # https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Setup_passphraseless_ssh
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa \
   && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys \
@@ -27,9 +22,6 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa \
 
 FROM base AS namenode
 RUN ${HADOOP_HOME}/bin/hdfs namenode -format
-# # Restarting ssh after formatting the namenode, because otherwise it doesn't work for some reason...
-# RUN service ssh restart && ${HADOOP_HOME}/sbin/start-dfs.sh
-# CMD ${HADOOP_HOME}/bin/hdfs --daemon start namenode
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs namenode
 
 FROM base AS datanode

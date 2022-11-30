@@ -9,8 +9,6 @@ services:
     ports:
       - 9870:9870
       - 9871:9871
-    expose:
-      - '9000'
     volumes:
       - namenode:/hadoop/dfs/name
 
@@ -23,7 +21,6 @@ services:
       - 9865:9865
       - 9866:9866
       - 9867:9867
-      - 9000:9000
     depends_on:
       - namenode
     volumes:
