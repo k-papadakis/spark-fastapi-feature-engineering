@@ -9,9 +9,11 @@ RUN apt-get update \
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-# Alternatively: ADD https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz /opt/
+# ADD https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz /opt/
 ADD ./hadoop-3.3.4.tar.gz /opt/
 ENV HADOOP_HOME=/opt/hadoop-3.3.4
+ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+ENV YARN_CONF_DIR=${HADOOP_CONF_DIR}
 ENV HADOOP_MAPRED_HOME=/opt/hadoop-3.3.4
 COPY hadoop-env.sh hdfs-site.xml core-site.xml mapred-site.xml yarn-site.xml workers ${HADOOP_HOME}/etc/hadoop/
 
@@ -29,6 +31,9 @@ FROM base AS datanode
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs datanode
 
 FROM base AS resourcemanager
+# ADD https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz /opt/
+ADD spark-3.3.1-bin-hadoop3.tgz /opt/
+ENV SPARK_HOME=/opt/spark-3.3.1-bin-hadoop3
 CMD service ssh restart && ${HADOOP_HOME}/bin/yarn resourcemanager
 
 FROM base AS nodemanager
