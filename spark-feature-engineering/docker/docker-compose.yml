@@ -1,5 +1,6 @@
 version: '3.9'
 
+
 services:
 
   namenode:
@@ -8,24 +9,60 @@ services:
       target: namenode
     ports:
       - 9870:9870
-      - 9871:9871
-    volumes:
-      - namenode:/hadoop/dfs/name
+    # volumes:
+    #   - namenode:/hadoop/dfs/name
 
-  datanode:
+  datanode1:
     build:
       context: ./
       target: datanode
-    ports:
-      - 9864:9864
-      - 9865:9865
-      - 9866:9866
-      - 9867:9867
+    # ports:
+    #   - 9864:9864
     depends_on:
       - namenode
-    volumes:
-      - datanode:/hadoop/dfs/data
+    # volumes:
+    #   - datanode:/hadoop/dfs/data
 
-volumes:
-  namenode:
-  datanode:
+  datanode2:
+    build:
+      context: ./
+      target: datanode
+    depends_on:
+      - namenode
+
+  resourcemanager:
+    build:
+      context: ./
+      target: resourcemanager
+    ports:
+      - 8088:8088
+    depends_on:
+      - namenode
+
+  nodemanager:
+    build:
+      context: ./
+      target: nodemanager
+    depends_on:
+      - namenode
+
+  proxyserver:
+    build:
+      context: ./
+      target: proxyserver
+    depends_on:
+      - namenode
+
+  historyserver:
+    build:
+      context: ./
+      target: historyserver
+    ports:
+      - 19888:19888
+    depends_on:
+      - namenode
+
+
+# volumes:
+#   namenode:
+#   datanode:
