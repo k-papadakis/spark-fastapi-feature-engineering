@@ -50,6 +50,8 @@ services:
     build:
       context: ./
       target: proxyserver
+    ports:
+      - 8123:8123
     depends_on:
       - namenode
 

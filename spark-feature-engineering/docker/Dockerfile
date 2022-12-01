@@ -24,6 +24,9 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa \
 
 
 FROM base AS namenode
+# ADD https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz /opt/
+ADD spark-3.3.1-bin-hadoop3.tgz /opt/
+ENV SPARK_HOME=/opt/spark-3.3.1-bin-hadoop3
 RUN ${HADOOP_HOME}/bin/hdfs namenode -format
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs namenode
 
@@ -31,9 +34,7 @@ FROM base AS datanode
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs datanode
 
 FROM base AS resourcemanager
-# ADD https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz /opt/
-ADD spark-3.3.1-bin-hadoop3.tgz /opt/
-ENV SPARK_HOME=/opt/spark-3.3.1-bin-hadoop3
+
 CMD service ssh restart && ${HADOOP_HOME}/bin/yarn resourcemanager
 
 FROM base AS nodemanager

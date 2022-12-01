@@ -1,0 +1,16 @@
+docker cp cvas_data.csv docker-namenode-1:/
+docker exec -it docker-namenode-1 /bin/bash
+
+$HADOOP_HOME/bin/hdfs dfs -mkdir /input
+$HADOOP_HOME/bin/hdfs dfs -put cvas_data.csv /input/
+$HADOOP_HOME/bin/hdfs fsck /input/cvas_data.csv -files -blocks -locations
+
+
+$SPARK_HOME/bin/spark-submit --class org.apache.spark.examples.SparkPi \
+    --master yarn \
+    --deploy-mode cluster \
+    --driver-memory 4g \
+    --executor-memory 2g \
+    --executor-cores 1 \
+    $SPARK_HOME/examples/jars/spark-examples*.jar \
+    10
