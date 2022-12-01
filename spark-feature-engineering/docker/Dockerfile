@@ -15,7 +15,7 @@ ENV HADOOP_HOME=/opt/hadoop-3.3.4
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 ENV YARN_CONF_DIR=${HADOOP_CONF_DIR}
 ENV HADOOP_MAPRED_HOME=/opt/hadoop-3.3.4
-COPY hadoop-env.sh hdfs-site.xml core-site.xml mapred-site.xml yarn-site.xml workers ${HADOOP_HOME}/etc/hadoop/
+COPY hadoop-conf/* ${HADOOP_HOME}/etc/hadoop/
 
 # https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Setup_passphraseless_ssh
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa \
@@ -34,7 +34,6 @@ FROM base AS datanode
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs datanode
 
 FROM base AS resourcemanager
-
 CMD service ssh restart && ${HADOOP_HOME}/bin/yarn resourcemanager
 
 FROM base AS nodemanager
