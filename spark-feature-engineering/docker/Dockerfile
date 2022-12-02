@@ -3,14 +3,17 @@ FROM ubuntu:focal AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get install -y ssh pdsh openjdk-8-jdk \
+    && apt-get install -y ssh pdsh openjdk-8-jdk wget\
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-# ADD https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz /opt/
-ADD ./hadoop-3.3.4.tar.gz /opt/
+# ADD ./hadoop-3.3.4.tar.gz /opt/
+RUN wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz \
+  && tar -xzf hadoop-3.3.4.tar.gz -C /opt/ \
+  && rm hadoop-3.3.4.tar.gz
+
 ENV HADOOP_HOME=/opt/hadoop-3.3.4
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 ENV YARN_CONF_DIR=${HADOOP_CONF_DIR}
@@ -24,9 +27,15 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa \
 
 
 FROM base AS namenode
-# ADD https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz /opt/
-ADD spark-3.3.1-bin-hadoop3.tgz /opt/
+# ADD spark-3.3.1-bin-hadoop3.tgz /opt/
+RUN wget https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz \
+  && tar -xzf spark-3.3.1-bin-hadoop3.tgz -C /opt/ \
+  && rm spark-3.3.1-bin-hadoop3.tgz
+
 ENV SPARK_HOME=/opt/spark-3.3.1-bin-hadoop3
+# https://spark.apache.org/docs/latest/api/python/getting_started/install.html#manually-downloading
+ENV PYTHONPATH=${SPARK_HOME}/python/lib/py4j-0.10.9.5-src.zip:${SPARK_HOME}/python/lib/pyspark.zip:${PYTHONPATH}
+
 RUN ${HADOOP_HOME}/bin/hdfs namenode -format
 CMD service ssh restart && ${HADOOP_HOME}/bin/hdfs namenode
 

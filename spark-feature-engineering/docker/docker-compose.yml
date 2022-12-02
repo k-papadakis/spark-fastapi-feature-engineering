@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 
 services:
@@ -30,6 +30,15 @@ services:
     depends_on:
       - namenode
 
+  nodemanager:
+    build:
+      context: ./
+      target: nodemanager
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+
   resourcemanager:
     build:
       context: ./
@@ -37,14 +46,7 @@ services:
     ports:
       - 8088:8088
     depends_on:
-      - namenode
-
-  nodemanager:
-    build:
-      context: ./
-      target: nodemanager
-    depends_on:
-      - namenode
+      - nodemanager
 
   proxyserver:
     build:
@@ -53,7 +55,7 @@ services:
     ports:
       - 8123:8123
     depends_on:
-      - namenode
+      - resourcemanager
 
   historyserver:
     build:
@@ -62,7 +64,7 @@ services:
     ports:
       - 19888:19888
     depends_on:
-      - namenode
+      - resourcemanager
 
 
 # volumes:
