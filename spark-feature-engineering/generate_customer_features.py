@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType, DateType, DecimalType, ShortType, StructField, StructType
 from pyspark.sql import functions as F
 
-spark = SparkSession.builder.appName('csvToParquet').getOrCreate()
+spark = SparkSession.builder.appName('customerFeatureEngineering').getOrCreate()
 
 DATE_FORMAT = "d/M/y"
 SCHEMA = StructType(
@@ -39,4 +39,4 @@ customer_features = (
     df.select(["customer_ID", "annual_income"]).dropDuplicates(["customer_ID"]).join(aggs, on="customer_ID")
 )
 
-customer_features.write.save('csv_data.parquet')
+customer_features.write.save('engineered_customer_features.parquet')

@@ -16,8 +16,8 @@ docker exec docker-namenode-1 bash -c '$HADOOP_HOME/bin/hdfs dfs -put /cvas_data
 docker exec docker-namenode-1 bash -c '$SPARK_HOME/bin/spark-submit --master yarn --deploy-mode cluster /generate_customer_features.py'
 
 # Download the results
-docker exec docker-namenode-1 bash -c '$HADOOP_HOME/bin/hdfs dfs -get /user/root/csv_data.parquet'
-docker cp docker-namenode-1:/csv_data.parquet ./data
+docker exec docker-namenode-1 bash -c '$HADOOP_HOME/bin/hdfs dfs -get /user/root/engineered_customer_features.parquet'
+docker cp docker-namenode-1:/engineered_customer_features.parquet ./data
 
 # Stop and clean up the containers
 docker compose --file ./docker/docker-compose.yml down
