@@ -1,8 +1,8 @@
 # Feature Engineering with Spark
 
-This project's goal is to set up a Hadoop cluster using docker, and engineer features by using Spark.
+This project's goal is to set up a Hadoop cluster using Docker, and engineer features by using Spark.
 
-The [data](./data/cvas_data.csv) is comprised of loans that customers have taken. We produces new features for each customer by performing aggregations on their loan data.
+The [data](./data/cvas_data.csv) is comprised of loans that customers have taken. We produce new features for each customer by performing aggregations on the loan data.
 
 The PySpark script to generate the features is [generate_customer_features.py](./generate_customer_features.py).
 
